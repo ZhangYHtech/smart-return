@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智退险 - 微软雅致版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    
+    <!-- ============= !!! 下边部分修改注入Crisp码 并加入先闭状态发指令!! ============== -->
+    <script type="text/javascript">
+  // 1. 初始化容器（您的代码原有的）
+  window.$crisp = [];
+
+  // ------------------------------------------------------------
+  // 【这是我为您新增的一行】
+  // 作用：让客服气球在封面页“隐身”，只有在后面点“继续”才出来
+  window.$crisp.push(["do", "chat:hide"]); 
+  // ------------------------------------------------------------
+
+  // 2. 您的专属 ID（这里完全就是您提供的那个 ID，原封不动）
+  window.CRISP_WEBSITE_ID = "bd4926a1-b375-4f44-8a42-665c9c2a1351";
+
+  // 3. 您的加载逻辑（这是您代码里那个 (function(){...})() 部分，只是换了行）
+  (function() {
+    d = document;
+    s = d.createElement("script");
+    s.src = "https://client.crisp.chat/l.js"; // 您的加载地址
+    s.async = 1;
+    d.getElementsByTagName("head")[0].appendChild(s);
+  })();
+</script>
+    <style>
+        /* 全局强制微软雅黑字体配置，去除滚动条 */
+        [x-cloak] { display: none !important; }
+        body { 
+            font-family: "Microsoft YaHei", "微软雅黑", -apple-system, BlinkMacSystemFont, sans-serif !important; 
+            -ms-overflow-style: none; 
+            scrollbar-width: none; 
+        }
+        body::-webkit-scrollbar { display: none; }
+        
+        /* 封面页滚动动画逻辑 */
+        .page-container { transition: transform 0.9s cubic-bezier(0.65, 0, 0.35, 1); height: 100vh; }
+        .page-section { height: 100vh; width: 100%; flex-shrink: 0; }
+        .fade-in { opacity: 0; transform: translateY(20px); transition: all 0.8s ease-out; }
+        .active .fade-in { opacity: 1; transform: translateY(0); }
+
+        /* 业务系统组件UI细节 */
+        .ergostep-active { border-bottom: 3px solid #a00030; color: #a00030; font-weight: bold;}
+    </style>
+</head>
+
+<body class="bg-white min-h-screen text-gray-800 selection:bg-red-200" 
+      x-data="insuranceApp()" 
+      :class="!isAppStarted ? 'overflow-hidden' : 'overflow-auto'" 
+      x-cloak>
+
+    <!-- ======================================================== -->
+    <!--                       第一部分：封面环境                     -->
+    <!-- ======================================================== -->
+    <div x-show="!isAppStarted" x-transition.opacity.duration.800ms class="w-full h-screen overflow-hidden relative">
+        
+        <!-- 封面专属头部：按要求仅保留Logo，无导航文字 -->
+        <div class="fixed top-0 left-0 w-full z-50 bg-white/90 backdrop-blur-sm border-b border-gray-100 px-6">
+            <div class="w-full flex items-center h-24 px-12">
+                <img src="./logo.png" alt="Smart Return Logo" class="h-20 w-auto object-contain">
+            </div>
+        </div>
+
+        <div id="main-wrapper" class="page-container">
+            
+            <!-- 原版封面：第一屏 (HERO) -->
+            <section class="h-screen w-full flex items-center relative page-section active bg-white">
+                <main class="w-full max-w-[1300px] mx-auto px-8 lg:px-12 grid lg:grid-cols-2 gap-8 items-center mt-[-5vh]">
+                    <div class="flex flex-col space-y-6 xl:pr-10 z-10">
+                        <h1 class="text-5xl lg:text-[4.5rem] font-bold text-gray-900 leading-[1.1] tracking-wide">
+                            专属于商家的，<br>
+                            智算退货保障。
+                        </h1>
+                        <p class="text-sm md:text-[15px] text-gray-600 leading-relaxed font-normal max-w-sm mt-4">
+                            摒弃传统核保套路，依据实时店铺场景极速风控。<br>
+                            让每次成单安心落袋，退损由我们承接。
+                        </p>
+                        <div class="pt-6">
+                            <!-- 串联按钮：点击触发 startApp() 进入系统 -->
+                            <button @click="startApp()" class="inline-flex items-center justify-center bg-[#a00030] text-white text-[17px] font-medium px-10 py-3 rounded-md hover:bg-red-800 transition-all shadow-sm cursor-pointer">
+                                立即测算我的报价
+                            </button>
+                        </div>
+                    </div>
+                    <div class="w-full h-full flex justify-center items-center p-2 relative">
+                        <img src="fengmiantupian.jpg" alt="风控时装画" class="w-full max-w-[600px] object-contain">
+                    </div>
+                </main>
+                <div onclick="scrollToPage(1)" class="absolute bottom-10 w-full flex flex-col items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer animate-bounce">
+                    <span class="text-xs tracking-widest mb-1 font-normal">拨动滚轮 或 点击此处向下</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                </div>
+            </section>
+
+            <!-- 原版封面：第二屏 (商业价值详情) -->
+            <section class="h-screen w-full bg-white flex items-center relative page-section overflow-hidden">
+                <div class="max-w-[1100px] w-full mx-auto px-8 lg:px-12 py-10 mt-16">
+                    <div class="text-center mb-12 fade-in">
+                        <p class="text-[#a00030] text-xs font-bold tracking-[0.3em] uppercase mb-4"></p>
+                        <h2 class="text-3xl md:text-[2.75rem] font-bold text-gray-900 leading-tight">退货不再是摩擦成本，而是增长的开始</h2>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-x-20 gap-y-12 items-start fade-in" style="transition-delay: 0.2s;">
+                        <div class="space-y-8">
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                                    <span class="w-8 h-px bg-[#a00030] mr-3"></span>商业能力包
+                                </h3>
+                                <p class="text-gray-500 leading-8 text-[15px] text-justify">
+                                    在传统的零售链条中，退货与保险往往被视为纯粹的“成本项”。但在“智退险”，我们颠覆了这一认知。您购买的不仅是一纸保单，而是一套<strong class="text-gray-800 font-bold underline decoration-[#a00030]/30 decoration-4">“商业能力包”</strong>。
+                                </p>
+                                <p class="text-gray-500 leading-8 text-[15px] mt-4 text-justify">
+                                    我们通过金融化手段，消除买卖双方的信任赤字，让保险成为提升门店转化率、降低客诉率、拉动复购率的最强经营工具。
+                                </p>
+                            </div>
+                            <div class="bg-gray-50 p-6 rounded-xl border-l-4 border-[#a00030]">
+                                <p class="text-sm font-bold text-gray-900 mb-2">四步即刻开启</p>
+                                <p class="text-xs text-gray-500 leading-6 font-medium">
+                                    信息收集 <span class="mx-1 text-[#a00030]">➔</span> 服务条款 <span class="mx-1 text-[#a00030]">➔</span> 智能报价 <span class="mx-1 text-[#a00030]">➔</span> 投保申请
+                                </p>
+                            </div>
+                        </div>
+                        <div class="space-y-10">
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                                    <span class="w-8 h-px bg-[#a00030] mr-3"></span>隐形护航，极简体验
+                                </h3>
+                                <div class="space-y-6">
+                                    <div class="flex items-start">
+                                        <div class="text-[#a00030] font-bold text-lg mr-4">01</div>
+                                        <p class="text-gray-500 text-[15px] leading-7 mt-0.5">
+                                            <span class="text-gray-900 font-bold">毫秒级智能测算：</span>系统根据您的品类、销售模式、地段与月销规划，实时完成风险精准识别与保费回算。
+                                        </p>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <div class="text-[#a00030] font-bold text-lg mr-4">02</div>
+                                        <p class="text-gray-500 text-[15px] leading-7 mt-0.5">
+                                            <span class="text-gray-900 font-bold">全天候人工服务：</span>内置 Crisp 实时通讯接口，无论前端多智能，总有温度在背后为您守候。
+                                        </p>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <div class="text-[#a00030] font-bold text-lg mr-4">03</div>
+                                        <p class="text-gray-500 text-[15px] leading-7 mt-0.5">
+                                            从试穿销售到售后理赔，保障在无形中自动触发，将摩擦损耗降至零感。
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-20 pt-10 border-t border-gray-100 flex justify-between items-center fade-in" style="transition-delay: 0.4s;">
+                        <p class="text-[11px] tracking-[0.2em] text-gray-400 font-medium">© 2026 SMART RETURN INSURANCE</p>
+                        <div onclick="scrollToPage(0)" class="text-[#a00030] text-xs font-bold cursor-pointer hover:underline tracking-widest">↑ 回到顶部</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+
+    <!-- ======================================================== -->
+    <!--                       第二部分：业务系统环境                 -->
+    <!-- ======================================================== -->
+    <div x-show="isAppStarted" x-transition.opacity.duration.600ms class="w-full min-h-screen bg-white">
+        
+        <!-- 原版业务系统：通用头部栏 -->
+        <div class="sticky top-0 z-50 bg-white border-b border-gray-200 px-6">
+            <div class="w-full flex justify-between items-center h-32 px-12">
+                <a href="#" @click="window.location.reload()" class="block shrink-0" title="返回封面">
+                    <img src="./logo.png" alt="Smart Return Logo" class="h-24 w-auto object-contain">
+                </a>
+                <div class="hidden sm:flex space-x-12 text-xl font-medium text-gray-400 tracking-wide">
+                    <div :class="page >= 1 && page <= 5 ? 'ergostep-active pb-1' : 'pb-1'">1 信息收集</div>
+                    <div :class="page === 6 ? 'ergostep-active pb-1' : 'pb-1'">2 服务条款</div>
+                    <div :class="page === 7 ? 'ergostep-active pb-1' : 'pb-1'">3 定价报价</div>
+                    <div :class="page >= 8 ? 'ergostep-active pb-1' : 'pb-1'">4 投保申请</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white px-8 py-10 min-h-[400px] max-w-[855px] mx-auto">
+            
+            <!-- 原版业务系统：P1 到 P5 信息收集 -->
+            <template x-if="page >= 1 && page <= 5">
+                <div>
+                    <button x-show="page > 1" @click="prevPage()" class="text-gray-400 hover:text-gray-900 transition-colors mb-6 text-3xl">&larr;</button>
+                    <h2 class="text-3xl font-bold mb-2">告诉我们关于您的生意信息</h2>
+                    <p class="text-gray-500 mb-8" x-text="'您当前正在选择: ' + stepsMap[page-1].label"></p>
+
+                    <div class="border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white divide-y divide-gray-100">
+                        <template x-for="(value, optKey) in stepsMap[page-1].options" :key="optKey">
+                            <div @click="selectOption(optKey)" 
+                                 class="p-5 flex items-center cursor-pointer transition-all duration-200"
+                                 :class="userAnswers[stepsMap[page-1].label] === optKey ? 'bg-red-50 border-l-4 border-[#a00030]' : 'hover:bg-gray-50 border-l-4 border-transparent'">
+                                <div class="w-6 h-6 border-2 rounded mr-4 flex items-center justify-center shrink-0"
+                                     :class="userAnswers[stepsMap[page-1].label] === optKey ? 'bg-[#a00030] border-[#a00030]' : 'border-gray-300 bg-white'">
+                                     <svg x-show="userAnswers[stepsMap[page-1].label] === optKey" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                </div>
+                                <span class="text-lg" x-text="optKey"></span>
+                            </div>
+                        </template>
+                    </div>
+
+                    <template x-if="page === 5">
+                        <div class="mt-8">
+                           <p class="text-gray-500 mb-2">手动填写销售规模（件/月）：</p>
+                           <input type="number" x-model="monthlySales" class="border p-3 w-full rounded focus:ring-2 focus:ring-[#a00030] outline-none">
+                        </div>
+                    </template>
+
+                    <div class="mt-10 flex justify-end">
+                        <button @click="nextPageFromQuestions()" class="bg-[#a00030] text-white px-10 py-3 rounded-full text-lg font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all">继续填写</button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- 原版业务系统：P6 合同板块 -->
+            <template x-if="page === 6">
+                <div class="max-w-3xl mx-auto">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-8">保障范围与服务约定</h2>
+                    <div class="bg-gray-50 p-10 rounded-xl border border-gray-100 text-gray-600 leading-relaxed shadow-inner">
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">我们保什么？</h3>
+                        <p class="mb-6">“智退险”旨在保障商家在退货事件中损失的经营预期收益，而非商品实物。<br>
+                        <strong>7天无理由退货保障:</strong>在保险期间内,消费者在收到商品之日起7日内发起的“无理由退货”,且商家已按流程完成退款，系统将补偿该笔交易对应的销售毛利润损失。<br>
+                        <strong>协商一致的退货保障：</strong>因商品质量与描述不符等客观原因，经买卖双方协商一致并完成的退货，产生的毛利润损失同样属于保障范围。</p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">哪些商品符合条件？</h3>
+                        <p class="mb-6">为了确保理赔过程的高效与透明，参保商品需满足以下条件：<br>
+                        <strong>正规货源：</strong>商品来源于合法采购渠道，具有清晰完整的进货凭证。<br>
+                        <strong>正价/折扣品：</strong>属于店内公开陈列、明码标价的商品（不含特价清仓处理品或促销赠品）。<br>
+                        <strong>交易可查：</strong>原始销售行为必须通过商家 POS 系统完成，具有完整的数字化交易记录。<br>
+                        <strong>标准化验收：</strong>商家需具备规范的退货验收流程，确保退回商品完好且不影响二次销售。</p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">不在保障范围的情形</h3>
+                        <p>为了维护健康的商业生态，以下情形产生的损失将无法获得赔付：<br>
+                        <strong>合规性缺失：</strong>无法提供 POS 交易记录或对应的物流信息；退回商品未经商家现场验收并确认完好状态。<br>
+                        <strong>异常经营行为：</strong>投保人、被保险人及其代理人的故意或恶意骗保行为；买卖双方串通伪造虚假退货记录。<br>
+                        <strong>特殊商品与流程外退货：</strong>非约定的“无理由”或“协商一致”之外的强行退货；清仓甩卖商品、样品或特价处理商品。</p>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-8">
+                        <button @click="prevPage()" class="text-gray-400 hover:text-gray-900 font-medium transition">返回修改</button>
+                        <div class="flex space-x-4">
+                            <button @click="abortFlow()" class="px-8 py-3 rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 transition">暂不考虑</button>
+                            <button @click="goToCalculate()" class="bg-[#a00030] text-white px-10 py-3 rounded-full font-bold shadow-lg hover:bg-red-800 transition">我已阅读，查看报价</button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- 原版业务系统：P7 定价结果面板 -->
+            <template x-if="page === 7">
+                <div class="text-center animate-fade-in-up">
+                    <p class="text-gray-400 text-sm font-bold uppercase tracking-widest mb-2">您的专属定制风控报告出炉</p>
+                    <h2 class="text-4xl font-black mb-10 text-gray-800">测算模型解构与费率测算</h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                        <div class="bg-gray-50 rounded-xl p-8 border flex flex-col items-center justify-center">
+                            <div class="text-gray-400 text-sm mb-3">模型参数: 每月预估退货单次</div>
+                            <div class="text-4xl font-bold text-[#a00030]"><span x-text="results.lmbda.toFixed(1)"></span> <span class="text-xl text-gray-500 font-normal">次</span></div>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-8 border flex flex-col items-center justify-center">
+                            <div class="text-gray-400 text-sm mb-3">衰减模拟: 预测均笔耗损期望</div>
+                            <div class="text-4xl font-bold text-[#a00030] flex items-baseline">
+                                <span class="text-xl text-gray-500 font-normal mr-1">¥</span>
+                                <span x-text="results.unitLoss.toFixed(2)"></span>
+                            </div>
+                        </div>
+                        <div class="bg-[#1b1c20] text-white rounded-xl p-8 border shadow-xl flex flex-col items-center justify-center">
+                            <div class="text-gray-300 text-sm mb-3 font-medium">推荐首月度智退承保方案总计</div>
+                            <div class="text-3xl font-black text-white flex items-baseline">
+                                <span class="text-xl text-red-400 mr-1">¥</span>
+                                <span x-text="results.premium.toFixed(2)"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between border-t pt-8 mt-10">
+                        <button @click="page = 1" class="text-gray-500 hover:text-black">重新测算</button>
+                        <div class="flex space-x-4">
+                            <button @click="abortFlow()" class="text-gray-500 px-6 py-2 hover:bg-gray-100 rounded-full transition">暂不投保，仅做了解</button>
+                            <button @click="page = 8" class="bg-[#a00030] text-white px-8 py-2 rounded-full font-bold shadow hover:bg-red-800 transition">确认报价，连线专属顾问 &rarr;</button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+<!-- P8: 人工服务沟通窗 (客服对接处) -->
+            <template x-if="page === 8">
+                <div class="flex flex-col md:flex-row h-[60vh] -m-8 overflow-hidden rounded-xl border border-gray-100 shadow">
+                    
+                    <!-- 左侧：保持你原有的数据展示不变 -->
+                    <div class="w-full md:w-1/3 bg-gray-50 border-r p-8 flex flex-col justify-between overflow-y-auto">
+                        <div>
+                            <div class="text-sm text-gray-400 mb-6 font-bold cursor-pointer" @click="page=7">&larr; 退回报告中心</div>
+                            <h3 class="text-xl font-bold mb-4 border-b pb-4">系统验算回溯存单:</h3>
+                            <ul class="space-y-4">
+                                <li class="flex justify-between">
+                                    <span class="text-gray-500">主经营项：</span>
+                                    <span class="font-medium text-black text-right" x-text="userAnswers['服装品类']"></span>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span class="text-gray-500">商业体模位：</span>
+                                    <span class="font-medium text-black text-right" x-text="userAnswers['店铺地段']"></span>
+                                </li>
+                                <div class="w-full h-px bg-gray-200"></div>
+                                <div class="bg-gray-100 p-4 rounded text-center">
+                                    <p class="text-xs text-gray-400 uppercase">经双方确定方案承保额度:</p>
+                                    <p class="text-3xl text-gray-900 font-bold mt-1">¥ <span x-text="results.premium.toFixed(2)"></span><span class="text-sm font-normal text-gray-500"> /Mo</span></p>
+                                </div>
+                            </ul>
+                        </div>
+                        <div class="mt-8 pt-4 border-t text-center">
+                             <button @click="page = 9" class="w-full bg-[#1b1c20] text-white py-3 rounded">确认方案，前往签约</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 右侧：替换为我们刚才优化的 Crisp 呼叫触发器 -->
+                    <div class="w-full md:w-2/3 bg-white p-12 flex flex-col items-center justify-center text-center">
+                         <div class="bg-red-50 text-[#a00030] rounded-full w-24 h-24 shadow-inner flex items-center justify-center mb-6 ring-8 ring-red-50/50">
+                            <svg class="w-10 h-10 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                         </div>
+<h3 class="text-2xl font-bold mb-3 text-gray-800">极连呼叫系统 — 专席顾问已待命</h3>
+                         <p class="text-gray-500 text-sm max-w-sm mb-6 leading-relaxed">
+                            为了给您提供更贴合店铺情况的服务,您可以点击下方按钮与我们的客服直接沟通。如果您更倾向于稍后详谈,我们希望您留下联系方式,我们的顾问会在24小时内与您取得联系。
+                         </p>
+                         
+                         <!-- 突出联系方式 -->
+                         <div class="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                             <p class="text-gray-600 text-sm">如有紧急咨询，欢迎拨打：</p>
+                             <p class="text-xl font-black text-[#a00030] tracking-wider mt-1">173-2683-2052</p>
+                         </div>
+
+                         <button @click="$crisp.push(['do', 'chat:show']); $crisp.push(['do', 'chat:open'])" class="bg-gray-900 text-white font-bold px-10 py-3 rounded-full hover:bg-gray-800 transition transform hover:-translate-y-0.5 shadow-lg flex items-center space-x-2">
+                             <span>开启对话，直接联系顾问 ></span>
+                         </button>
+                    </div>
+
+                </div>
+            </template>
+
+            <!-- 原版业务系统：P9 收场画面 -->
+            <template x-if="page === 9">
+                <div class="text-center py-20">
+                    <h2 class="text-4xl font-bold mb-4" x-text="isRefuse ? '感谢您的体验' : '提交成功！'"></h2>
+                    <p class="text-gray-500 text-lg mb-8" x-text="isRefuse ? '智退险风险评估平台持续为您开放，当您准备好为门店升级保障时，随时可以回来重新生成专属保障方案' : '您的专属顾问已接单，稍后将为您发送服务回访与确认信息，请注意查收'"></p>
+                    <button onclick="window.location.reload()" class="border px-6 py-2 rounded-full shadow-sm text-gray-500 hover:text-black">回到主页</button>
+                </div>
+            </template>
+
+        </div>
+    </div>
+
+
+    <!-- ======================================================== -->
+    <!--                       底层逻辑脚本                           -->
+    <!-- ======================================================== -->
+    <script>
+        // --- 封面滚动逻辑 ---
+        let currentPage = 0;
+        const totalPages = 2;
+        let isScrolling = false;
+        const wrapper = document.getElementById('main-wrapper');
+        const sections = document.querySelectorAll('.page-section');
+        
+        // 全局变量：用于控制是否允许页面自然滚动
+        window._isInSystemModel = false;
+
+        function scrollToPage(index) {
+            if (window._isInSystemModel || index < 0 || index >= totalPages) return;
+            currentPage = index;
+            wrapper.style.transform = `translateY(-${index * 100}vh)`;
+            
+            sections.forEach((sec, i) => {
+                if(i === index) sec.classList.add('active');
+                else sec.classList.remove('active');
+            });
+        }
+
+        window.addEventListener('wheel', (e) => {
+            if (isScrolling || window._isInSystemModel) return;
+            isScrolling = true;
+            setTimeout(() => { isScrolling = false; }, 1100);
+
+            if (e.deltaY > 0) {
+                if (currentPage < totalPages - 1) scrollToPage(currentPage + 1);
+            } else {
+                if (currentPage > 0) scrollToPage(currentPage - 1);
+            }
+        }, { passive: true });
+
+        let touchStartY = 0;
+        window.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, {passive: true});
+        window.addEventListener('touchend', e => {
+            if (window._isInSystemModel) return;
+            let touchEndY = e.changedTouches[0].clientY;
+            if (touchStartY - touchEndY > 60) scrollToPage(currentPage + 1);
+            if (touchEndY - touchStartY > 60) scrollToPage(currentPage - 1);
+        }, {passive: true});
+
+
+        // --- 原版核心业务控制逻辑 (Alpine) ---
+        function insuranceApp() {
+            return {
+                isAppStarted: false, // 控制封面与业务系统的切换
+                page: 1, 
+                userAnswers: {}, 
+                monthlySales: 500, 
+                isRefuse: false, 
+                results: { lmbda: 0, unitLoss: 0, premium: 0 },
+
+                modelConfig: {
+                    "品类": {
+                        "基础T恤/内衣/袜子": { S: 0.8, M: 1.2, freq: 1.0 },
+                        "牛仔裤/休闲长裤": { S: 1.2, M: 0.8, freq: 1.0 },
+                        "全棉卫衣/针织衫": { S: 2.8, M: 2.5, freq: 1.5 },
+                        "连衣裙/时尚女装": { S: 3.9, M: 4.2, freq: 1.5 },
+                        "春秋风衣/薄夹克": { S: 3.2, M: 3.5, freq: 1.5 },
+                        "冬季羽绒服/厚棉袄": { S: 4.9, M: 4.5, freq: 1.5 },
+                        "夏季泳装/沙滩裤": { S: 4.7, M: 2.2, freq: 1.8 },
+                        "商务西装/羊毛大衣": { S: 2.5, M: 8.2, freq: 1.5 },
+                        "真丝/羊绒奢侈款": { S: 3.5, M: 9.8, freq: 1.8 },
+                        "高端礼服/重工装饰": { S: 4.2, M: 9.9, freq: 1.8 },
+                        "户外冲锋衣/滑雪服": { S: 3.5, M: 5.5, freq: 1.5 }
+                    },
+                    "销售模式": {
+                        "现场试穿满意后买单": 1.0, 
+                        "朋友圈/社群代发": 1.5, 
+                        "直播带货/远程发货": 3.0 
+                    },
+                    "店铺地段": {
+                        "社区底商/学校街道": 1.0, 
+                        "核心商圈/购物中心": 1.2, 
+                        "批发市场/特卖场": 2.0 
+                    },
+                    "价格区间": {
+                        "300元以下": { P: 0.8, avg: 200 }, 
+                        "300-800元": { P: 2.2, avg: 550 },
+                        "800-2000元": { P: 3.5, avg: 1400 }, 
+                        "2000-5000元": { P: 4.3, avg: 3500 },
+                        "5000元以上": { P: 4.9, avg: 6000 } 
+                    }
+                },
+
+                stepsMap: [
+                    { label: '服装品类', options: {} },
+                    { label: '销售模式', options: {} },
+                    { label: '店铺地段', options: {} },
+                    { label: '价格区间', options: {} },
+                    { label: '月销规划 (手动录单预值)', options: {} } 
+                ],
+
+                init() {
+                    this.stepsMap[0].options = this.modelConfig['品类'];
+                    this.stepsMap[1].options = this.modelConfig['销售模式'];
+                    this.stepsMap[2].options = this.modelConfig['店铺地段'];
+                    this.stepsMap[3].options = this.modelConfig['价格区间'];
+                },
+
+                // 核心：点击封面按钮后触发，进入系统
+                startApp() {
+                    this.isAppStarted = true;
+                    window._isInSystemModel = true; // 释放页面正常滚动权限
+                    window.scrollTo({ top: 0, behavior: 'smooth' }); // 滚动到最顶部
+                },
+
+                selectOption(optKey) {
+                    this.userAnswers[this.stepsMap[this.page-1].label] = optKey;
+                },
+
+                nextPageFromQuestions() {
+                    let labelStr = this.stepsMap[this.page-1].label;
+                    if (this.page < 5 && !this.userAnswers[labelStr]) {
+                         alert("页面中存在未选择的选项，请补充完整后再继续"); return;
+                    }
+                    this.page++; 
+                },
+
+                prevPage() { this.page--; },
+
+                abortFlow() {
+                    this.isRefuse = true;
+                    this.page = 9; 
+                },
+
+                goToCalculate() {
+                    let ans_cat = this.userAnswers['服装品类'];
+                    let ans_mod = this.userAnswers['销售模式'];
+                    let ans_loc = this.userAnswers['店铺地段'];
+                    let ans_prc = this.userAnswers['价格区间'];
+                    
+                    let x1 = this.modelConfig['销售模式'][ans_mod];
+                    let x2 = this.modelConfig['品类'][ans_cat].freq;
+                    let x3 = this.modelConfig['店铺地段'][ans_loc];
+                    let S  = this.modelConfig['品类'][ans_cat].S;
+                    let M  = this.modelConfig['品类'][ans_cat].M;
+                    let P  = this.modelConfig['价格区间'][ans_prc].P;
+                    let avgPrice = this.modelConfig['价格区间'][ans_prc].avg;
+                    let volume = parseInt(this.monthlySales);
+
+                    let logit_val = -7.5788 - 0.2302 * x1 + 2.9550 * x2 + 2.6509 * x3 - 1.7627 * (x2 * x3);
+                    let expMath = Math.exp(-logit_val); 
+                    let freqFinalLam = (1 / (1 + expMath)) * volume;
+                    
+                    let lnI_mathLog = -3.2773 + 0.1820 * S + 0.1258 * M + 0.1162 * P;
+                    let unitExpectDown = Math.exp(lnI_mathLog) * avgPrice;
+
+                    this.results.lmbda = freqFinalLam;
+                    this.results.unitLoss = unitExpectDown;
+                    this.results.premium = (freqFinalLam * unitExpectDown) * 0.8;
+
+                    this.page = 7;
+                }
+            }
+        }
+    </script>
+</body>
+</html>
