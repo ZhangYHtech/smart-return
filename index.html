@@ -62,8 +62,8 @@
     <div x-show="!isAppStarted" x-transition.opacity.duration.800ms class="w-full h-screen overflow-hidden relative">
         
         <!-- 封面专属头部：按要求仅保留Logo，无导航文字 -->
-        <div class="fixed top-0 left-0 w-full z-50 bg-white/90 backdrop-blur-sm border-b border-gray-100 px-6">
-            <div class="w-full flex items-center h-24 px-12">
+        <div class="fixed top-0 left-0 w-full z-50 bg-white/90 backdrop-blur-sm border-b border-gray-100">
+            <div class="w-full max-w-[1300px] mx-auto flex items-center h-24 px-8 lg:px-12">
                 <img src="./logo.png" alt="Smart Return Logo" class="h-20 w-auto object-contain">
             </div>
         </div>
@@ -71,10 +71,10 @@
         <div id="main-wrapper" class="page-container">
             
             <!-- 原版封面：第一屏 (HERO) -->
-            <section class="h-screen w-full flex items-center relative page-section active bg-white">
-                <main class="w-full max-w-[1300px] mx-auto px-8 lg:px-12 grid lg:grid-cols-2 gap-8 items-center mt-[-5vh]">
+            <section class="h-screen w-full flex items-center relative page-section active bg-white pt-24">
+                <main class="w-full max-w-[1300px] mx-auto px-8 lg:px-12 grid lg:grid-cols-2 gap-8 items-center">
                     <div class="flex flex-col space-y-6 xl:pr-10 z-10">
-                        <h1 class="text-5xl lg:text-[4.5rem] font-bold text-gray-900 leading-[1.1] tracking-wide">
+<h1 class="text-4xl md:text-5xl xl:text-[4.5rem] font-bold text-gray-900 leading-[1.1] tracking-wide">
                             专属于商家的，<br>
                             智算退货保障。
                         </h1>
