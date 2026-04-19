@@ -73,7 +73,8 @@
             <!-- 原版封面：第一屏 (HERO) -->
             <section class="h-screen w-full flex items-center relative page-section active bg-white pt-24">
                 <main class="w-full max-w-[1300px] mx-auto px-8 lg:px-12 grid lg:grid-cols-2 gap-8 items-center">
-                    <div class="flex flex-col space-y-6 xl:pr-10 z-10">
+                    <!-- 删除 pr-10，让文字可以一直写到间距边缘 -->
+                    <div class="flex flex-col space-y-6 z-10">
 <!-- 这里的 4rem 就是你要求的“上限” -->
 <h1 class="text-[clamp(2.5rem,5.5vw,4rem)] font-bold text-gray-900 leading-[1.1] tracking-wide">
                             专属于商家的，<br>
