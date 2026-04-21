@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智退险 - 微软雅致版</title>
+    <title>智退险 
+    </title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     
@@ -263,7 +264,7 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                         <div class="bg-gray-50 rounded-xl p-8 border flex flex-col items-center justify-center">
-                            <div class="text-gray-400 text-sm mb-3">模型参数: 每月预估退货单次</div>
+                            <div class="text-gray-400 text-sm mb-3">模型参数: 二到八月预估退货单次</div>
                             <div class="text-4xl font-bold text-[#a00030]"><span x-text="results.lmbda.toFixed(1)"></span> <span class="text-xl text-gray-500 font-normal">次</span></div>
                         </div>
                         <div class="bg-gray-50 rounded-xl p-8 border flex flex-col items-center justify-center">
@@ -274,7 +275,7 @@
                             </div>
                         </div>
                         <div class="bg-[#1b1c20] text-white rounded-xl p-8 border shadow-xl flex flex-col items-center justify-center">
-                            <div class="text-gray-300 text-sm mb-3 font-medium">推荐首月度智退承保方案总计</div>
+                            <div class="text-gray-300 text-sm mb-3 font-medium">推荐智退承保方案总计</div>
                             <div class="text-3xl font-black text-white flex items-baseline">
                                 <span class="text-xl text-red-400 mr-1">¥</span>
                                 <span x-text="results.premium.toFixed(2)"></span>
@@ -412,7 +413,7 @@
                 isAppStarted: false, // 控制封面与业务系统的切换
                 page: 1, 
                 userAnswers: {}, 
-                monthlySales: 500, 
+                monthlySales: 300, 
                 isRefuse: false, 
                 results: { lmbda: 0, unitLoss: 0, premium: 0 },
 
@@ -507,14 +508,14 @@
 
                     let logit_val = -7.5788 - 0.2302 * x1 + 2.9550 * x2 + 2.6509 * x3 - 1.7627 * (x2 * x3);
                     let expMath = Math.exp(-logit_val); 
-                    let freqFinalLam = (1 / (1 + expMath)) * volume;
+                    let freqFinalLam = (1 / (1 + expMath)) * (volume*6);
                     
                     let lnI_mathLog = -3.2773 + 0.1820 * S + 0.1258 * M + 0.1162 * P;
                     let unitExpectDown = Math.exp(lnI_mathLog) * avgPrice;
 
                     this.results.lmbda = freqFinalLam;
                     this.results.unitLoss = unitExpectDown;
-                    this.results.premium = (freqFinalLam * unitExpectDown) * 0.8;
+                    this.results.premium = (freqFinalLam * unitExpectDown) *0.8;
 
                     this.page = 7;
                 }
